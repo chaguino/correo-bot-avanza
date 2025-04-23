@@ -11,12 +11,12 @@ import time
 
 # --- Configuración de correo (POP3) ---
 EMAIL_USER = "santiagog@avanzaloop.com"
-EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Se guarda en Render
+EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 POP_SERVER = "vmail.globalpc.net"
 POP_PORT = 995
 
-# --- Palabras clave y remitentes importantes ---
-PALABRAS_CLAVE = ["Santiago", "Santi", "Guerrero", "Urgente", "Crítico"]
+# --- Palabras clave (solo cuerpo) y remitentes exactos ---
+PALABRAS_CLAVE = ["Santiago", "Santi", "Guerrero"]
 REMITENTES_IMPORTANTES = [
     "ricardoat@avanzaloop.com",
     "robertoat@avanzaloop.com",
@@ -101,7 +101,6 @@ def revisar_correos():
         else:
             body = email_message.get_content()
 
-        texto = f"{subject} {to_} {cc_} {body}"
         from_email_raw = email_message.get("from", "").lower()
         from_email_real = from_email_raw[from_email_raw.find("<")+1:from_email_raw.find(">")] if "<" in from_email_raw else from_email_raw
         id_unico = generar_id_mensaje(subject, from_email_real, body)
@@ -109,7 +108,9 @@ def revisar_correos():
         if id_unico in ids_previos:
             continue
 
-        if any(p.lower() in texto.lower() for p in PALABRAS_CLAVE) or from_email_real in REMITENTES_IMPORTANTES:
+        body_lower = body.lower()
+
+        if any(p.lower() in body_lower for p in PALABRAS_CLAVE) or from_email_real in REMITENTES_IMPORTANTES:
             print(f"✅ Correo relevante detectado de {from_email_real}")
             cuerpo_limpio = limpiar_texto(body)
 
